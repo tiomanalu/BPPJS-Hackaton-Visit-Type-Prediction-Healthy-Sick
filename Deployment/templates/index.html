@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>BPJS Visit Type Prediction</title>
+  <link href='https://fonts.googleapis.com/css?family=Pacifico' rel='stylesheet' type='text/css'>
+  <link href='https://fonts.googleapis.com/css?family=Arimo' rel='stylesheet' type='text/css'>
+  <style>
+    body {
+      font-family: Arimo, sans-serif;
+      background-color: #f4f4f9;
+      color: #333;
+      margin: 0;
+      padding: 20px;
+    }
+    .form-container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      font-family: Pacifico, cursive;
+      color: #2c3e50;
+    }
+    select {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      width: 100%;
+      padding: 10px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #f2f2f2;
+      border-radius: 5px;
+    }
+    table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+table th, table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+}
+
+table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+table tr:hover {
+  background-color: #f1f1f1;
+}
+
+  </style>
+</head>
+<body>
+  <div class="form-container">
+    <h1>BPJS Visit Type Prediction</h1>
+    <form id="predictionForm" action="/predict" method="POST">
+      <label for="Jenis_Poliklinik">Pilih Jenis Poliklinik:</label>
+      <select name="Jenis_Poliklinik" id="Jenis_Poliklinik" required>
+        <option value="">-- Pilih Jenis Poliklinik --</option>
+        {% for poliklinik in poliklinik_list %}
+        <option value="{{ poliklinik }}">{{ poliklinik }}</option>
+        {% endfor %}
+      </select>
+
+      <label for="Nama_Diagnosis">Pilih Diagnosis:</label>
+      <select name="Nama_Diagnosis" id="Nama_Diagnosis" required>
+        <option value="">-- Pilih Diagnosis --</option>
+        {% for diagnosis in diagnosis_list %}
+        <option value="{{ diagnosis }}">{{ diagnosis }}</option>
+        {% endfor %}
+      </select>
+
+      <label for="Jenis_Kunjungan">Pilih Jenis Kunjungan:</label>
+      <select name="Jenis_Kunjungan" id="Jenis_Kunjungan" required>
+        <option value="">-- Pilih Jenis Kunjungan --</option>
+        {% for jenis in jenis_kunjungan_list %}
+        <option value="{{ jenis }}">{{ jenis }}</option>
+        {% endfor %}
+      </select>
+
+      <label for="Provinsi_faskes_tujuan_rujukan">Pilih Provinsi Faskes:</label>
+      <select name="Provinsi_faskes_tujuan_rujukan" id="Provinsi_faskes_tujuan_rujukan" required>
+        <option value="">-- Pilih Provinsi --</option>
+        {% for provinsi in provinsi_list %}
+        <option value="{{ provinsi }}">{{ provinsi }}</option>
+        {% endfor %}
+      </select>
+
+      <label for="Kepemilikan_faskes">Pilih Kepemilikan Faskes:</label>
+      <select name="Kepemilikan_faskes" id="Kepemilikan_faskes" required>
+        <option value="">-- Pilih Kepemilikan Faskes --</option>
+        {% for kepemilikan in kepemilikan_list %}
+        <option value="{{ kepemilikan }}">{{ kepemilikan }}</option>
+        {% endfor %}
+      </select>
+
+      <label for="Jenis_faskes">Pilih Jenis Faskes:</label>
+      <select name="Jenis_faskes" id="Jenis_faskes" required>
+        <option value="">-- Pilih Jenis Faskes --</option>
+        {% for jenis_faskes in jenis_faskes_list %}
+        <option value="{{ jenis_faskes }}">{{ jenis_faskes }}</option>
+        {% endfor %}
+      </select>
+
+      <label for="Tipe_faskes">Pilih Tipe Faskes:</label>
+      <select name="Tipe_faskes" id="Tipe_faskes" required>
+        <option value="">-- Pilih Tipe Faskes --</option>
+        {% for tipe_faskes in tipe_faskes_list %}
+        <option value="{{ tipe_faskes }}">{{ tipe_faskes }}</option>
+        {% endfor %}
+      </select>
+
+      <label for="Poli_faskes">Pilih Poli Faskes:</label>
+      <select name="Poli_faskes" id="Poli_faskes" required>
+        <option value="">-- Pilih Poli Faskes --</option>
+        {% for poli_faskes in poli_faskes_list %}
+        <option value="{{ poli_faskes }}">{{ poli_faskes }}</option>
+        {% endfor %}
+      </select>
+
+      <button type="submit">Prediksi</button>
+    </form>
+
+    <!-- Div untuk menampilkan hasil prediksi -->
+{% if prediction_text or selected_features %}
+<div class="result" id="resultDiv">
+  <h3>Hasil Prediksi:</h3>
+
+  <!-- Tampilkan prediction_text sebagai kalimat biasa -->
+  <p id="predictionText">{{ prediction_text }}</p>
+
+  <!-- Tampilkan selected_features sebagai tabel -->
+  {% if selected_features %}
+  <h4>Detail Fitur yang Dipilih:</h4>
+  <table>
+    <thead>
+      <tr>
+        <th>Fitur</th>
+        <th>Inputan</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for key, value in selected_features.items() %}
+      <tr>
+        <td>{{ key }}</td>
+        <td>{{ value }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endif %}
+  </div>
+</body>
+</html>
